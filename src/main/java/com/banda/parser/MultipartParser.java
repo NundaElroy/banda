@@ -1,8 +1,12 @@
 package com.banda.parser;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class MultipartParser {
     private final byte[] data;
     private final String boundary;
+    private static final Logger log = LoggerFactory.getLogger(MultipartParser.class);
 
     public MultipartParser(byte[] data, String boundary) {
         this.data = data;
@@ -12,10 +16,10 @@ public class MultipartParser {
     public ParseResult parse() {
         try {
             String dataAsString = new String(data);
-
+         ;
             String filename = extractFilename(dataAsString);
             if (filename == null) return null;
-
+            log.debug("Extracted filename: {}", filename);
             String contentType = extractContentType(dataAsString);
             byte[] fileContent = extractFileContent(dataAsString);
 
@@ -23,7 +27,7 @@ public class MultipartParser {
 
             return new ParseResult(filename, fileContent, contentType);
         } catch (Exception e) {
-            System.err.println("Parse error: " + e.getMessage());
+            log.error("Error parsing multipart data", e);
             return null;
         }
     }
