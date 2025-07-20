@@ -1,0 +1,58 @@
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <!-- 1. Patterns -->
+    <property name="STD_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"/>
+    <property name="ERR_PATTERN"
+              value="%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"/>
+
+    <!-- 2. Console appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${STD_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 3. Rolling file (all levels) -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/app.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rotation, keep 14 days -->
+            <fileNamePattern>logs/app.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>14</maxHistory>
+        </rollingPolicy>
+        <encoder><pattern>${STD_PATTERN}</pattern></encoder>
+    </appender>
+
+    <!-- 4. Separate error file -->
+    <appender name="ERRORS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/error.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>14</maxHistory>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <encoder><pattern>${ERR_PATTERN}</pattern></encoder>
+    </appender>
+
+    <!-- 5. (Optional) Async wrapper for disk IO -->
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE"/>
+        <queueSize>8192</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+    </appender>
+
+    <!-- 6. Root logger -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ASYNC_FILE"/>
+        <appender-ref ref="ERRORS"/>
+    </root>
+
+    <!-- 7. Example: quieter for noisy libs -->
+    <logger name="org.eclipse.jetty" level="WARN"/>
+    <logger name="io.netty" level="WARN"/>
+
+</configuration>
