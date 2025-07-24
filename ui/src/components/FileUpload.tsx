@@ -14,7 +14,13 @@ export default function FileUpload({ onFileUpload, isUploading }: FileUploadProp
   
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
-      onFileUpload(acceptedFiles[0]);
+      const file = acceptedFiles[0];
+      const maxSize = 100 * 1024 * 1024; // 100MB in bytes
+      if (file.size > maxSize) {
+        alert('File size exceeds 100MB.');
+        return;
+      }
+      onFileUpload(file);
     }
   }, [onFileUpload]);
   

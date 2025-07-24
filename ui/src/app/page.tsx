@@ -93,8 +93,8 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <header className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-blue-600 mb-2">PeerLink</h1>
-        <p className="text-xl text-gray-600">Secure P2P File Sharing</p>
+        <h1 className="text-4xl font-bold text-blue-600 mb-2">Banda</h1>
+        <p className="text-xl text-gray-600"> P2P File Sharing</p>
       </header>
       
       <div className="bg-white rounded-lg shadow-lg p-6">
@@ -157,7 +157,7 @@ export default function Home() {
       </div>
       
       <footer className="mt-12 text-center text-gray-500 text-sm">
-        <p>PeerLink &copy; {new Date().getFullYear()} - Secure P2P File Sharing</p>
+        <p>Banda &copy; {new Date().getFullYear()} -  P2P File Sharing</p>
       </footer>
     </div>
   );
