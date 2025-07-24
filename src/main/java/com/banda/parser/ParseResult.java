@@ -1,4 +1,6 @@
 package com.banda.parser;
 
 
-public record ParseResult(String fileName, byte[] fileContent, String contentType) {}
+import java.nio.file.Path;
+
+public record ParseResult(String fileName, Path filePath) {}

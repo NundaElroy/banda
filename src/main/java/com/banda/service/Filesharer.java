@@ -32,6 +32,7 @@ public class Filesharer {
             attempts++;
         }
         log.error("No available ports for file: {}", filePath);
+        //Todo handle this case appropriately
         throw new RuntimeException("No available ports found");
     }
 
@@ -40,7 +41,7 @@ public class Filesharer {
         String filePath = availableFiles.get(port);
         if (filePath == null) {
             log.error("No file associated with port: {}", port);
-            //TODO: Handle this case appropriately, maybe throw a custom exception or log an error
+            //TODO: Handle this  throw a custom exception or log an error
             throw new IllegalArgumentException("No file associated with the given port: " + port);
         }
         try(ServerSocket serverSocket = new ServerSocket(port)) {

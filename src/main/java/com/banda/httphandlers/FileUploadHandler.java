@@ -2,9 +2,11 @@ package com.banda.httphandlers;
 
 
 
+import com.banda.annotations.ResponseStatus;
+import com.banda.parser.IntegratedFileParser;
 import com.banda.response.HttpStatus;
 import com.banda.service.Filesharer;
-import com.banda.parser.MultipartParser;
+//import com.banda.parser.MultipartParser;
 import com.banda.parser.ParseResult;
 import com.banda.response.ResponseHelper;
 import com.sun.net.httpserver.Headers;
@@ -22,10 +24,11 @@ public class FileUploadHandler implements HttpHandler {
     private final String uploadDir;
     private final ResponseHelper responseHelper;
     private static Logger log = LoggerFactory.getLogger(FileUploadHandler.class);
-
-    public FileUploadHandler(Filesharer filesharer, String uploadDir) {
+    private final IntegratedFileParser fileParser;
+    public FileUploadHandler(Filesharer filesharer, String uploadDir, IntegratedFileParser fileParser) {
         this.filesharer = filesharer;
         this.uploadDir = uploadDir;
+        this.fileParser = fileParser;
         this.responseHelper = new ResponseHelper();
     }
 
@@ -52,7 +55,20 @@ public class FileUploadHandler implements HttpHandler {
             processUpload(exchange);
         } catch (Exception e) {
             log.error("Error processing upload request: {}", e.getMessage(), e);
-            responseHelper.sendErrorResponse(exchange, HttpStatus.INTERNAL_SERVER_ERROR.code(), HttpStatus.INTERNAL_SERVER_ERROR.reason());
+            // 1) Look for @ResponseStatus on the exception class
+            ResponseStatus rs = e.getClass().getAnnotation(ResponseStatus.class);
+
+
+
+            if (rs != null) {
+                int status = rs.code();
+                String message =  e.getMessage() != null ? e.getMessage() : rs.reason();
+                log.error("Sending error response with status {}: {}", status, message);
+                responseHelper.sendErrorResponse(exchange,status, message);
+            }else {
+                log.error("Sending internal server error response", e);
+                responseHelper.sendErrorResponse(exchange, HttpStatus.INTERNAL_SERVER_ERROR.code(), HttpStatus.INTERNAL_SERVER_ERROR.reason());
+            }
         }
     }
 
@@ -66,12 +82,17 @@ public class FileUploadHandler implements HttpHandler {
     private void processUpload(HttpExchange exchange) throws IOException {
         String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
         String boundary = extractBoundary(contentType);
+//
+//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//        IOUtils.copy(exchange.getRequestBody(), baos);
+//
+//        //use the simple factory to get parser
+//        MultipartParser parser = new MultipartParser(baos.toByteArray(), boundary);
+//        ParseResult result = parser.parse();
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        IOUtils.copy(exchange.getRequestBody(), baos);
 
-        MultipartParser parser = new MultipartParser(baos.toByteArray(), boundary);
-        ParseResult result = parser.parse();
+        ParseResult result = fileParser.parseMultipartFile(exchange.getRequestBody(), boundary, uploadDir);
+
 
         if (result == null) {
             log.error("Failed to parse multipart data");
@@ -79,7 +100,7 @@ public class FileUploadHandler implements HttpHandler {
             return;
         }
 
-        String savedFilePath = saveFile(result);
+        String savedFilePath = result.filePath().toString();
         int port = filesharer.offerFile(savedFilePath);
 
 
@@ -97,16 +118,5 @@ public class FileUploadHandler implements HttpHandler {
         return contentType.substring(contentType.indexOf("boundary=") + 9);
     }
 
-    private String saveFile(ParseResult result) throws IOException {
-        String fileName = result.fileName().isEmpty() ? "uploaded_unknown_file" : result.fileName();
-        String uniqueFilename = UUID.randomUUID().toString() + "_" + new File(fileName).getName();
-        String filePath = uploadDir + File.separator + uniqueFilename;
-        log.info("Saving file to: {}", filePath);
-        try (FileOutputStream fos = new FileOutputStream(filePath)) {
-            fos.write(result.fileContent());
-        }
-        log.debug("File saved successfully at: {}", filePath);
 
-        return filePath;
-    }
 }

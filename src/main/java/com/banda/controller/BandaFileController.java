@@ -2,6 +2,7 @@ package com.banda.controller;
 
 import com.banda.httphandlers.CORSHandler;
 import com.banda.httphandlers.FileDownloadHandler;
+import com.banda.parser.IntegratedFileParser;
 import com.banda.service.FileDownloadService;
 import com.banda.httphandlers.FileUploadHandler;
 import com.banda.service.Filesharer;
@@ -42,10 +43,11 @@ public class BandaFileController {
     private void setupRoutes() {
         log.debug("Setting up routes for BandaFileController");
         FileDownloadService downloadService = new FileDownloadService();
+        IntegratedFileParser IntegratedFileParser = new IntegratedFileParser();
 
         httpServer.createContext("/", new CORSHandler());
         httpServer.createContext("/download", new FileDownloadHandler(downloadService));
-        httpServer.createContext("/upload", new FileUploadHandler(filesharer, uploadDir));
+        httpServer.createContext("/upload", new FileUploadHandler(filesharer, uploadDir, IntegratedFileParser));
         log.debug("Routes set up successfully");
         httpServer.setExecutor(executorService);
     }
