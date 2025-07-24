@@ -26,6 +26,13 @@ export default function Home() {
           'Content-Type': 'multipart/form-data',
         },
       });
+
+     if(response.status == 400) {
+        alert('File upload failed. Please ensure the file is valid  and less than 100MBs and try again.');
+        setIsUploading(false);
+        return
+     }
+
       
       setPort(response.data.port);
     } catch (error) {
