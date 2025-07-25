@@ -1,6 +1,6 @@
-# PeerLink UI
+# Banda UI
 
-This is the frontend UI for the PeerLink P2P file sharing application. It's built with Next.js, TypeScript, and Tailwind CSS.
+This is the frontend UI for the Banda P2P file sharing application. It's built with Next.js, TypeScript, and Tailwind CSS.
 
 ## Features
 
@@ -12,7 +12,7 @@ This is the frontend UI for the PeerLink P2P file sharing application. It's buil
 ## Prerequisites
 
 - Node.js 18+ and npm
-- Java 11+ (for the backend)
+- Java 21+ (for the backend)
 
 ## Getting Started
 
@@ -66,7 +66,7 @@ To start the backend server:
 ```bash
 cd ..  # Go back to the project root
 mvn clean package
-java -jar target/p2p-1.0-SNAPSHOT.jar
+java -jar target/banda-1.0-SNAPSHOT.jar
 ```
 
 ## Project Structure
