@@ -47,4 +47,28 @@
 
     </dependencies>
 
+    <build>
+    <plugins>
+        <!-- Example: Spring Boot repackage (fat‑JAR) plugin -->
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>repackage</goal>
+                    </goals>
+                </execution>
+            </executions>
+            <configuration>
+                <layered>false</layered>
+                <mainClass>com.banda.Main</mainClass>
+            </configuration>
+        </plugin>
+
+        <!-- You can add more plugins here, e.g. the Shade plugin, Surefire, etc. -->
+    </plugins>
+    </build>
+
 </project>
