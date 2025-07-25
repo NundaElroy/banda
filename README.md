@@ -246,3 +246,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - SLF4J and Logback for logging
 - React Icons for UI icons
 - TailwindCSS for styling
+- Lovepreet for project inspo
