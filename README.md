@@ -18,7 +18,34 @@ Banda is a peer-to-peer file sharing application that allows users to share file
 
 Banda follows a client-server architecture with a unique P2P approach for actual file transfers:
 
-![Architecture Diagram](https://mermaid.ink/img/pako:eNqNkl9rwjAUxb9KyNOGOuiLgvgwoWNuKOoc-yNkJG1uNZgmpWnZKH73JbXqmJt7SXLPOb-bm5s5iYTGJCHMclThsD66jbJmNdNGuaLeVbIsuZCiafswrueqsrCVkRDnN3CvK0HF8U5YqWaAoBuBs0djZAGzRsvXrjbgxbFx8VK8yZ3M-TUuuFPawRMynh2d48UJ_VhncJL7aKfKzBYyXGdQ0_ppq55_oGN_7JBL_ZaMnHZ0MIKr66vRsB8ZM63pyANSjHZKiiKC0KCEB3kvc0Ux7S9RMbxD6lO_hwwHtJ9eJD7jl5acHdO-9Gj2SfEp3YU8CKwslAjweOyPMPGQUQ9THlIqaK-PcXvnfwA-MKCD4RPNYRpQNqW9oTiK4FF76Qe0D6AUKO7QYx3Q3qd9Wtx5rs7s1Yok2O4lXpeWLKRrdRzH4KSfxM0GMCHy0JGETA3KgnLW5nlYm-w8PNc58aqwJBF0evj3TD_R5xd4JMQW?type=png)
+```mermaid
+graph TD
+    Client[Frontend Client] -->|HTTP Requests| Controller[BandaFileController]
+    Controller -->|Upload| FileUploadHandler
+    Controller -->|Download| FileDownloadHandler
+    Controller -->|CORS| CORSHandler
+    
+    FileUploadHandler -->|Parse Files| Parser[IntegratedFileParser]
+    Parser -->|Detect Type| TypeDetector[FileExtensionHelper]
+    
+    FileUploadHandler -->|Start Server| FileSharer[FileSharer]
+    FileSharer -->|Assign Port| Port[Dynamic Port]
+    Port -->|Generate| InviteCode[Invite Code]
+    
+    FileDownloadHandler -->|Connect to Port| DownloadService[FileDownloadService]
+    DownloadService -->|Stream File| Client
+    
+    subgraph Backend
+        Controller
+        FileUploadHandler
+        FileDownloadHandler
+        CORSHandler
+        Parser
+        TypeDetector
+        FileSharer
+        DownloadService
+    end
+```
 
 ### Backend Components
 
@@ -51,7 +78,33 @@ Banda follows a client-server architecture with a unique P2P approach for actual
 
 ### Data Flow
 
-![Data Flow Diagram](https://mermaid.ink/img/pako:eNqdlE9vozAUxL-K5VMrJQFCqkgVh02apsqfZrfZtj20Ujl4wRu8xkbYJmqrfPet3aRKmmTVHjBjef7Gzz4MJJKYJIKMJYomM7kMl-FNNeMVlTm8Z1qHD4WucNTQGl-9tdMJiSwTWskSx8HwRKq1RJMvhdGFHOZooxmOHcsPFN-zjK-jSs5HZKKEzFCE8_HwsNa5kMN4N9R1-oPoOI6G7RB8bkOi-CI1ZP-3EbEz_flzqAtz4HHcbs1M4HWPTDzikTueMMcKR_0Jc8ae50_8YBgGPrHboR-5c-L1VuTJEVNEBqx_Ao3lHLU4zkWBQ_YSXt9E19E0HN1Ex_hGZmgnSvDGzPWpey6iJ-QS7Z9drcAkVE_R9OLqa9F2hIy1XIVvgIaUmSwp1izS5MtcS6JfXGFGUim0qJrVhb-xiiqjlyRwxsOWihVmsqhYMhfsyY8js0zKNjyGKebJfDWyVtkP4_N5ZlzDkihVmGcso1mr_imJ5qGNZM2GbZayZBaDO5YsVKqUnO2XYLYLjdMhM2pHPjnOrNS35mvaHG0lpfshRhE32txHkwJs18Ud3MWnlvey3kC0coJ4HSWFTbAvtD_BvlDia78oWP3VBFd6-XY1OkpEunXT7cu6trdhIIeQULHONr8EqRor0lr-buI7QZLGSKJVmpS1puW9yOrszxVrWsoRhCR12MZJkh0iK3S23ovgW71_8ysO57VCJL-emrQkC4sYn57T-x9WFN0d?type=png)
+```mermaid
+sequenceDiagram
+    participant User1 as Sender
+    participant FE1 as Frontend (Sender)
+    participant BE as Backend Server
+    participant FE2 as Frontend (Receiver)
+    participant User2 as Receiver
+    
+    %% Upload Flow
+    User1->>FE1: Selects file to share
+    FE1->>BE: POST /api/upload
+    BE->>BE: Generates dynamic port
+    BE->>BE: Starts file server on port
+    BE-->>FE1: Returns port number
+    FE1->>User1: Displays invite code
+    
+    %% Share invite code (out of band)
+    User1->>User2: Shares invite code
+    
+    %% Download Flow
+    User2->>FE2: Enters invite code
+    FE2->>BE: GET /api/download?port=xxxxx
+    BE->>BE: Connects to dynamic port
+    BE->>BE: Streams file data
+    BE-->>FE2: Returns file stream
+    FE2->>User2: Triggers file download
+```
 
 1. **Upload Process:**
    - User uploads file in frontend
